@@ -1,0 +1,64 @@
+{{- $namespace := .Release.Namespace -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: shob-server-{{ $namespace }}-cm
+  namespace: {{ $namespace }}
+data:
+  DETECTION_MODULE: 'true'
+  DOMAIN_ID: '8'
+  MATRIX_MODULE: 'true'
+  NODE_ENV: dev
+  PARTICIPANT: 'QOSLibrary::basic_participant'
+  ROOSTER_MODULE: 'false'
+  RTI_LICENSE_FILE: /app/assets/env/rti_license.dat
+  UI_MODULE: 'true'
+  SHOB_PORT: '7705'
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: shob-ui-{{ $namespace }}-cm
+  namespace: {{ $namespace }}
+data:
+  SHOB_URL: 'https://shob-server-{{ $namespace }}.apps.soiland-okd.soiland.local'
+  VIDEO_URL: 'wss://web-streamer-{{ $namespace }}.apps.soiland-okd.soiland.local'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shob-pyland-{{ $namespace }}-cm
+  namespace: {{ $namespace }}
+data:
+  STARTUP_TEMPLATE: dji_slave
+  RTI_LICENSE_FILE: /rti/rti_license.dat
+  PORT_RANGE: 4800-4999
+  DOMAINID: '8'
+  MACHINE_IP: shob-pyland-{{ $namespace }}.apps.soiland-okd.soiland.local
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dds-logger-{{ $namespace }}-cm
+  namespace: {{ $namespace }}
+data:
+  DOMAIN_ID: '8'
+  ELASTIC_URL: {{ .Values.elastic_server }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ddsim-server-{{ $namespace }}-cm
+  namespace: {{ $namespace }}
+data:
+  DOMAIN_ID: '8'
+  PARTICIPANT_QOS: 'basic_participant'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ddsim-client-{{ $namespace }}-cm
+  namespace: {{ $namespace }}
+data:
+  SERVER_IP: 'https://ddsim-server-{{ $namespace }}.apps.soiland-okd.soiland.local'
+  SERVER_PORT: '/'

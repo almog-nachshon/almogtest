@@ -1,0 +1,80 @@
+# Default values for shob-preprod-app.
+# The host name of docker registry
+registry: registry:5000
+# The elastic server for dds logger
+elastic_server: http://elastic:9200
+# The policy for behaving pulling image
+pullPolicy: Always
+# The secret name of image pull secret
+imagePullSecrets: soi-registry-secret
+# The hostname of NFS server
+nfs: mgt
+# The path of shob-server content on NFS
+content_shob_server: /Data/pv-cluster/Shob
+# The path of shob-ui content on NFS
+content_shob_ui: /Data/pv-cluster/Shob-ui
+# The path of RTI Licence for pyland app, on NFS
+rti_lic: /Data/pv-cluster/rti
+
+# The ui values
+pod_ui:
+  # The name of deployment
+  name: shob-ui
+  # The logo of this pod, for topology design
+  logo: nginx
+  # The containers in the pod
+  container_ui:
+      # The name of this container
+    - name: shob-ui
+      # The image name of this container
+      image: shob-ui-openshift
+      # The tag image name of this container
+      tag: latest
+  container_ddsim_client: 
+    - name: ddsim-client
+      # The image name of this container
+      image: ddsim-client
+      # The tag image name of this container
+      tag: latest
+  container_web_streamer:
+    - name: web-streamer
+      # The image name of this container
+      image: node-rtsp-server
+      # The tag image name of this container
+      tag: latest
+
+# The server values
+pod_server:
+  # The name of deployment
+  name: shob-server
+  # The logo of this pod, for topology design
+  logo: nodejs
+  # The containers in this pod
+  container_server:
+      # The name of this container
+    - name: shob-server
+      # The image name of this container
+      image: shob-server-openshift
+      # The tag image name of this container
+      tag: latest
+  container_pyland:
+      # The name of this container
+    - name: shob-pyland
+      # The image name of this container
+      image: pyland_deploy
+      # The tag image name of this container
+      tag: stable
+  container_ddsim_server:
+      # The name of this container
+    - name: ddsim-server
+      # The image name of this container
+      image: ddsim-server
+      # The tag image name of this container
+      tag: latest
+  container_dds_logger:
+      # The name of this container
+    - name: dds-logger
+      # The image name of this container
+      image: dds_logger_dds_logger
+      # The tag image name of this container
+      tag: latest

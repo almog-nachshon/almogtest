@@ -1,0 +1,42 @@
+{{- $namespace := .Release.Namespace -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shob-server-{{ $namespace }}-cliam
+  namespace: {{ $namespace }}
+spec:
+  resources:
+    requests:
+      storage: 10Mi
+  volumeName: shob-server-{{ $namespace }}-pv
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shob-ui-{{ $namespace }}-cliam
+  namespace: {{ $namespace }}
+spec:
+  resources:
+    requests:
+      storage: 10Mi
+  volumeName: shob-ui-{{ $namespace }}-pv
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shob-pyland-{{ $namespace }}-cliam
+  namespace: {{ $namespace }}
+spec:
+  resources:
+    requests:
+      storage: 10Mi
+  volumeName: shob-pyland-{{ $namespace }}-pv
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""

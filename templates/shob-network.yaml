@@ -1,0 +1,228 @@
+{{- $namespace := .Release.Namespace -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: shob-server-{{ $namespace }}-se
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: shob-server-{{ $namespace }}
+  ports:
+  - port: 7705
+    targetPort: 7705
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: shob-server-{{ $namespace }}-rt
+  namespace: {{ $namespace }}
+  labels:
+    app: shob-server-{{ $namespace }}-rt
+spec:
+  host: shob-server-{{ $namespace }}.apps.soiland-okd.soiland.local
+  to:
+    kind: Service
+    name: shob-server-{{ $namespace }}-se
+    weight: 100
+  port:
+    targetPort: 7705
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: shob-server-{{ $namespace }}.apps.soiland-okd.soiland.local
+      routerName: default 
+      wildcardPolicy: None
+      routerCanonicalHostname: router-default.apps.soiland-okd.soiland.local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shob-ui-{{ $namespace }}-se
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: shob-ui-{{ $namespace }}
+  ports:
+  - port: 7706
+    targetPort: 7706
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: shob-ui-{{ $namespace }}-rt
+  namespace: {{ $namespace }}
+  labels:
+    app: shob-ui-{{ $namespace }}-rt
+spec:
+  host: shob-ui-{{ $namespace }}.apps.soiland-okd.soiland.local
+  to:
+    kind: Service
+    name: shob-ui-{{ $namespace }}-se
+    weight: 100
+  port:
+    targetPort: 7706
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: shob-ui-{{ $namespace }}.apps.soiland-okd.soiland.local
+      routerName: default 
+      wildcardPolicy: None
+      routerCanonicalHostname: router-default.apps.soiland-okd.soiland.local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shob-pyland-{{ $namespace }}-se
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: shob-server-{{ $namespace }}
+  ports:
+  - port: 4999 
+    targetPort: 4999 
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: shob-pyland-{{ $namespace }}-rt
+  namespace: {{ $namespace }}
+  labels:
+    app: shob-pyland-{{ $namespace }}-rt
+spec:
+  host: shob-pyland-{{ $namespace }}.apps.soiland-okd.soiland.local
+  to:
+    kind: Service
+    name: shob-pyland-{{ $namespace }}-se
+    weight: 100
+  port:
+    targetPort: 4999
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: shob-pyland-{{ $namespace }}.apps.soiland-okd.soiland.local
+      routerName: default 
+      wildcardPolicy: None
+      routerCanonicalHostname: router-default.apps.soiland-okd.soiland.local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddsim-server-{{ $namespace }}-se
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: shob-server-{{ $namespace }}
+  ports:
+  - port: 4849
+    targetPort: 4849
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ddsim-server-{{ $namespace }}-rt
+  namespace: {{ $namespace }}
+  labels:
+    app: ddsim-server-{{ $namespace }}-rt
+spec:
+  host: ddsim-server-{{ $namespace }}.apps.soiland-okd.soiland.local
+  to:
+    kind: Service
+    name: ddsim-server-{{ $namespace }}-se
+    weight: 100
+  port:
+    targetPort: 4849
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: ddsim-server-{{ $namespace }}.apps.soiland-okd.soiland.local
+      routerName: default 
+      wildcardPolicy: None
+      routerCanonicalHostname: router-default.apps.soiland-okd.soiland.local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddsim-client-{{ $namespace }}-se
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: shob-ui-{{ $namespace }}
+  ports:
+  - port: 4850
+    targetPort: 4850 
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: ddsim-client-{{ $namespace }}-rt
+  namespace: {{ $namespace }}
+  labels:
+    app: ddsim-client-{{ $namespace }}-rt
+spec:
+  host: ddsim-client-{{ $namespace }}.apps.soiland-okd.soiland.local
+  to:
+    kind: Service
+    name: ddsim-client-{{ $namespace }}-se
+    weight: 100
+  port:
+    targetPort: 4850
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: ddsim-client-{{ $namespace }}.apps.soiland-okd.soiland.local
+      routerName: default 
+      wildcardPolicy: None
+      routerCanonicalHostname: router-default.apps.soiland-okd.soiland.local
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-streamer-{{ $namespace }}-se
+  namespace: {{ $namespace }}
+spec:
+  selector:
+    app: shob-ui-{{ $namespace }}
+  ports:
+  - port: 2000
+    targetPort: 2000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: web-streamer-{{ $namespace }}-rt
+  namespace: {{ $namespace }}
+  labels:
+    app: web-streamer-{{ $namespace }}-rt
+spec:
+  host: web-streamer-{{ $namespace }}.apps.soiland-okd.soiland.local
+  to:
+    kind: Service
+    name: web-streamer-{{ $namespace }}-se
+    weight: 100
+  port:
+    targetPort: 2000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
+status:
+  ingress:
+    - host: web-streamer-{{ $namespace }}.apps.soiland-okd.soiland.local
+      routerName: default 
+      wildcardPolicy: None
+      routerCanonicalHostname: router-default.apps.soiland-okd.soiland.local

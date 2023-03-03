@@ -1,0 +1,150 @@
+{{- $registry := .Values.registry -}}
+{{- $namespace := .Release.Namespace -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.pod_server.name }}-{{ $namespace }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ .Values.pod_server.name }}-{{ $namespace }}
+    app.kubernetes.io/part-of: shob-server-{{ $namespace }}
+    app.openshift.io/runtime: {{ .Values.pod_server.logo }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.pod_server.name }}-{{ $namespace }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.pod_server.name }}-{{ $namespace }}
+    spec:
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      containers:
+        {{- range .Values.pod_server.container_server }}
+      - name: {{ .name }}
+        image: {{ $registry }}/{{ .image }}-production:{{ .tag }}
+        {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 7705
+          protocol: TCP
+        {{- range .Values.pod_server.container_server }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}-{{ $namespace }}-cm
+        {{- end }}
+        volumeMounts:
+          - name: shob
+            mountPath: /shob
+        {{- range .Values.pod_server.container_pyland }}
+      - name: {{ .name }}
+        image: {{ $registry }}/{{ .image }}:{{ .tag }}
+        {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 4999
+          protocol: TCP
+        {{- range .Values.pod_server.container_pyland }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}-{{ $namespace }}-cm
+        {{- end }}
+        volumeMounts:
+          - name: rti
+            mountPath: /rti
+        {{- range .Values.pod_server.container_ddsim_server }}
+      - name: {{ .name }}
+        image: {{ $registry }}/{{ .image }}:{{ .tag }}
+        {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 4849
+        {{- range .Values.pod_server.container_ddsim_server }}
+        envFrom:
+          - configMapRef: 
+              name: {{ .name }}-{{ $namespace }}-cm
+        {{- end }}
+        {{- range .Values.pod_server.container_dds_logger }}
+      - name: {{ .name }}
+        image: {{ $registry }}/{{ .image }}:{{ .tag }}
+        {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        {{- range .Values.pod_server.container_dds_logger }}
+        envFrom:
+          - configMapRef: 
+              name: {{ .name }}-{{ $namespace }}-cm
+        {{- end }}
+      volumes:
+      - name: shob
+        {{- range .Values.pod_server.container_server }}
+        persistentVolumeClaim:
+          claimName: {{ .name }}-{{ $namespace }}-cliam
+        {{- end }}
+      - name: rti
+        {{- range .Values.pod_server.container_pyland }}
+        persistentVolumeClaim:
+          claimName: {{ .name }}-{{ $namespace }}-cliam
+        {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.pod_ui.name }}-{{ $namespace }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ .Values.pod_ui.name }}-{{ $namespace }}
+    app.kubernetes.io/part-of: shob-{{ $namespace }}
+    app.openshift.io/runtime: {{ .Values.pod_ui.logo }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.pod_ui.name }}-{{ $namespace }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.pod_ui.name }}-{{ $namespace }}
+    spec:
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      containers:
+      {{- range .Values.pod_ui.container_ui }}
+      - name: {{ .name }}-{{ $namespace }}
+        image: {{ $registry }}/{{ .image }}-production:{{ .tag }}
+      {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 7706
+          protocol: TCP
+        {{- range .Values.pod_ui.container_ui }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}-{{ $namespace }}-cm
+        {{- end }}
+        volumeMounts:
+          - name: shob
+            mountPath: /shob
+        {{- range .Values.pod_ui.container_ddsim_client }}
+      - name: {{ .name }}-{{ $namespace }}
+        image: {{ $registry }}/{{ .image }}:{{ .tag }}
+        {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 4850
+          protocol: TCP
+        {{- range .Values.pod_ui.container_ddsim_client }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}-{{ $namespace }}-cm
+        {{- end }}
+        {{- range .Values.pod_ui.container_web_streamer }}
+      - name: {{ .name }}-{{ $namespace }}
+        image: {{ $registry }}/{{ .image }}:{{ .tag }}
+        {{- end }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 2000
+      volumes:
+      - name: shob
+        persistentVolumeClaim:
+          claimName: {{ .Values.pod_ui.name }}-{{ $namespace }}-cliam
