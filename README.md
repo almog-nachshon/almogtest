@@ -72,6 +72,40 @@
   ```
 - Regular dependency updates scheduled weekly to prevent large disruptive changes.
 
+### 2.6 Alternative Approach: GitHub Actions with Helm and Argo CD
+- Separate branches for each environment (`prod`, `stage`, `dev`, `test`) containing Helm charts.
+- Each branch synced via Argo CD for automated and declarative deployments.
+- GitHub Actions workflows triggered on branch commits push updated Helm charts, triggering Argo CD sync.
+
+Example workflow snippet:
+
+```yaml
+name: Helm Chart Deploy
+
+on:
+  push:
+    branches:
+      - prod
+      - stage
+      - dev
+      - test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/DevOpsRole-${{ github.ref_name }}
+          aws-region: us-east-1
+      - name: Package and Push Helm Chart
+        run: |
+          helm package ./helm/${{ github.ref_name }} -d ./helm-repo
+          aws s3 sync ./helm-repo s3://my-helm-chart-repo/${{ github.ref_name }}
+```
+
 ## 🚀 Section 3: Continuous Deployment (CD)
 
 ### 3.1 Deploying Affected Services Only
@@ -103,50 +137,6 @@
           - name: my-service
             image: my-service:${{ github.sha }}
   ```
-
-### 3.4 Rollback Plan & Observability
-- Automatic rollback mechanism if Canary deployment shows high error rates (>1%).
-- Observability via Prometheus metrics and Grafana dashboards.
-- Example rollback trigger:
-  ```yaml
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/path: '/metrics'
-  ```
-
-### 3.5 Managing Secrets & Config
-- Store secrets using SOPS-encrypted YAML files in Git.
-- Runtime injection via External Secrets Operator:
-  ```yaml
-  apiVersion: external-secrets.io/v1beta1
-  kind: ExternalSecret
-  metadata:
-    name: db-credentials
-  spec:
-    secretStoreRef:
-      kind: SecretStore
-      name: aws-secrets-manager
-    target:
-      name: db-credentials
-    data:
-      - secretKey: username
-        remoteRef:
-          key: database/username
-      - secretKey: password
-        remoteRef:
-          key: database/password
-  ```
-
-### 3.6 EKS Node Structure
-- Use dedicated node pools:
-  - High-CPU nodes for compute-intensive tasks.
-  - General-purpose nodes for standard workloads.
-  - Autoscaling via Kubernetes Autoscaler/Karpenter based on service metrics.
-
-### 3.7 Definition of Successful Deployment
-- All smoke tests pass post-deployment.
-- Metrics in Prometheus remain within defined thresholds.
-- No critical alerts triggered in monitoring systems.
 
 ## ⚠️ Section 4: Challenges & Tradeoffs
 
